@@ -12,3 +12,8 @@ Vagrant-inspired provisioning tool for use with [OpenStack][].
 - `files` is a directory containing files that will be installed
   by Ansible as part of the provisioning process.
 
+The configuration files are fully commented.  If you have any
+questions, please feel free to file issues on [GitHub][].
+
+[github]: https://github.com/larsks/drifter-example
+
