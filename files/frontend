@@ -1,13 +1,28 @@
 # Frontend configuration.
 
-RewriteEngine On
 RewriteLock /var/lock/apache2/rewritelock
-RewriteMap dynproxy prg:/usr/local/sbin/dynproxy-rwm
 
-RewriteCond %{REQUEST_URI} !^/proxy/
-RewriteRule /dyn/(.*) http://${dynproxy:dummy}/$1 [P]
+<VirtualHost *:80>
+	RewriteEngine On
+	RewriteMap dynproxy prg:/usr/local/sbin/dynproxy-rwm
 
-WSGIScriptAlias /proxy /var/lib/dynproxy/adapter.wsgi
-WSGIDaemonProcess dynproxy
-WSGIProcessGroup dynproxy
+	RewriteCond %{REQUEST_URI} !^/proxy/
+	RewriteRule /dyn/(.*) http://${dynproxy:dummy|localhost:8080}/$1 [P]
+
+	WSGIScriptAlias /proxy /var/lib/dynproxy/adapter.wsgi
+	WSGIDaemonProcess dynproxy
+	WSGIProcessGroup dynproxy
+
+	DocumentRoot /var/www
+</VirtualHost>
+
+Listen 8080
+
+<VirtualHost *:8080>
+	RewriteEngine On
+	RewriteCond %{REQUEST_URI} !=/noproxies.html
+	RewriteRule /(.*) /noproxies.html [P]
+
+	DocumentRoot /var/www
+</VirtualHost>
 
