@@ -1,11 +1,21 @@
 project:
+  # The project name in combination with your OpenStack
+  # username is used when qualifying object names (such as instances
+  # and security groups).
   project_name: cluster
 
+  # The `security groups` section of this file defines named OpenStack security
+  # groups that will be used by your instances.  These will be named
+  # <name>.<project_name>.<user_name>, so they will not generally conflict with
+  # existing security groups.
   security groups:
+    # We'll make everything a member of this security group so
+    # that we can ssh into everything.
     default:
       - protocol: tcp
         from port: 22
       - protocol: icmp
+    # Our web server will allow a variety of inbound web-related ports.
     web:
       - protocol: tcp
         from port: 80
@@ -15,17 +25,29 @@ project:
         from port: 8000
         to port: 9000
 
+  # The `instances` section defines the instances that Drifter will create.
   instances:
+    # The `default` entry is used to provide defaults to other entries.
     default:
       image: ubuntu-precise-x86_64
       flavor: m1.small
-      security_groups:
+      security groups:
         - default
+
+    # Our master node.
     master:
+      # The `userdata` key identifies a file the contents of which will be made 
+      # available to the running instance via the OpenStack metadata server.  This 
+      # can be used to provide information to a boot-time provisioning tool such
+      # as cloud-init.
       userdata: userdata/master
-      security_groups:
+      # This instance will be a member of both the default and web
+      # security groups.
+      security groups:
         - default
         - web
+
+    # Use the Jinja2 templating engine to create multiple node instances.
     {% for node in range(0,3) %}
     node-{{node}}:
     {% endfor %}
