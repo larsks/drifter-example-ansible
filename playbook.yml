@@ -30,6 +30,7 @@
     - python-bottle
     - python-yaml
     - libapache2-mod-wsgi
+    - sqlite3
   - action: file state=absent path=/etc/apache2/sites-enabled/000-default
     notify:
     - restart apache
@@ -55,7 +56,9 @@
   - action: copy src=files/dynproxy-rwm dest=/usr/local/sbin/dynproxy-rwm mode=0755
     notify:
     - restart apache
+  - action: command rm -f /var/cache/apache2/dynproxy.db
   - action: command /usr/bin/sudo -u www-data /usr/bin/python /var/lib/dynproxy/dynproxy/initdb.py
+  - action: copy src=files/noproxies.html dest=/var/www/noproxies.html
   - action: service name=apache2 state=started
   handlers:
   - name: restart apache
