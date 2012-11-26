@@ -1,0 +1,2 @@
+dburi: sqlite:////var/cache/apache2/dynproxy.db
+

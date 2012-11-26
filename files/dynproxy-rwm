@@ -1,0 +1,4 @@
+#!/bin/sh
+
+exec python /var/lib/dynproxy/dynproxy/rwm.py
+

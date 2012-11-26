@@ -1,0 +1,13 @@
+# Frontend configuration.
+
+RewriteEngine On
+RewriteLock /var/lock/apache2/rewritelock
+RewriteMap dynproxy prg:/usr/local/sbin/dynproxy-rwm
+
+RewriteCond %{REQUEST_URI} !^/proxy/
+RewriteRule /dyn/(.*) http://${dynproxy:dummy}/$1 [P]
+
+WSGIScriptAlias /proxy /var/lib/dynproxy/adapter.wsgi
+WSGIDaemonProcess dynproxy
+WSGIProcessGroup dynproxy
+
