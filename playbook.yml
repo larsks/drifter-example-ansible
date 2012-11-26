@@ -1,6 +1,11 @@
+# This play simply gathers facts from all the hosts so that we
+# can use them later on in templates and so forth.
 - hosts: all
   user: ubuntu
   sudo: true
+
+# Install common packages on all systems in 
+# the cluster.
 - hosts: all
   user: ubuntu
   sudo: true
@@ -12,6 +17,8 @@
     - git-core
     - ruby-json
     - apache2
+
+# Set up the frontend server.
 - hosts: master
   user: ubuntu
   sudo: true
@@ -53,6 +60,8 @@
   handlers:
   - name: restart apache
     action: command /usr/sbin/service apache2 restart
+
+# This registers the backends with the master.
 - hosts: node*
   user: ubuntu
   sudo: true
