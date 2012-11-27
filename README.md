@@ -7,10 +7,10 @@ Vagrant-inspired provisioning tool for use with [OpenStack][].
 # What you'll find here
 
 - `project.yml` is the Drifter configuration file for this project.
-- `playbook.yml` is the Ansible playbook used to provision the
-  instances created by Drifter.
-- `files` is a directory containing files that will be installed
-  by Ansible as part of the provisioning process.
+- `playbook.yml` is the top-level Ansible playbook used to provision
+  the instances created by Drifter.
+- `playbooks` contains the various component playbooks and
+  associated files.
 
 The configuration files are fully commented.  If you have any
 questions, please feel free to file issues on [GitHub][].
