@@ -1,0 +1,9 @@
+# This play simply gathers facts from all the hosts so that we
+# can use them later on in templates and so forth.  Note that
+# throughout this file we assume that we need to connect to the 
+# cloud instances as user "ubuntu" and that we will use "sudo"
+# to acquire privileges.
+- hosts: all
+  user: ubuntu
+  sudo: true
+

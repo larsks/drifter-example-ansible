@@ -1,4 +1,0 @@
-#!/bin/sh
-
-date > /tmp/flagfile
-

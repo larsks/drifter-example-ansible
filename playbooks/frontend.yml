@@ -1,0 +1,68 @@
+# Set up the frontend server.
+- hosts: master
+  user: ubuntu
+  sudo: true
+  gather_facts: false
+  tasks:
+
+  # Install packages using apt.
+  - action: apt pkg=$item
+    with_items:
+    - python-sqlalchemy
+    - python-bottle
+    - python-yaml
+    - libapache2-mod-wsgi
+    - sqlite3
+
+  # Disable the default virtual host definition.  If this action fires,
+  # Ansible will restart Apache after complete the remaining tasks.
+  - action: file state=absent path=/etc/apache2/sites-enabled/000-default
+    notify:
+    - restart apache
+
+  # Activate a number of Apache modules.
+  - action: file state=link src=/etc/apache2/mods-available/$item path=/etc/apache2/mods-enabled/$item
+    with_items:
+    - rewrite.load
+    - wsgi.conf
+    - wsgi.load
+    - proxy.conf
+    - proxy.load
+    - proxy_http.load
+    notify:
+    - restart apache
+
+  # Install our frontend Apache configuration.
+  - action: copy src=files/frontend dest=/etc/apache2/sites-enabled/frontend
+    notify:
+    - restart apache
+
+  # Clone the dynamic proxy into /var/lib/dynproxy.
+  - action: git repo=git://github.com/larsks/dynproxy-http dest=/var/lib/dynproxy
+    notify:
+    - restart apache
+
+  # Install the dynproxy configuration file.
+  - action: copy src=files/dynproxy.yml dest=/etc/dynproxy.yml
+    notify:
+    - restart apache
+
+  # Install a wrapper script for the prg: rewritemap script.
+  - action: copy src=files/dynproxy-rwm dest=/usr/local/sbin/dynproxy-rwm mode=0755
+    notify:
+    - restart apache
+
+  # Remove and re-generate the database every time we provision the hosts.  This is
+  # necessary to take care of schema differences, and should be fine because this 
+  # playbook includes code to register the backends with the frontend on every run.
+  - action: command rm -f /var/cache/apache2/dynproxy.db
+  - action: command /usr/bin/sudo -u www-data /usr/bin/python /var/lib/dynproxy/dynproxy/initdb.py
+
+  # This file is displayed if no backends are available.
+  - action: copy src=files/noproxies.html dest=/var/www/noproxies.html
+
+  # Make sure Apache is running.
+  - action: service name=apache2 state=started enabled=true
+  handlers:
+  - name: restart apache
+    action: command /usr/sbin/service apache2 restart

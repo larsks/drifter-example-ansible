@@ -33,14 +33,14 @@ project:
       flavor: m1.small
       security groups:
         - default
-
-    # Our master node.
-    master:
       # The `userdata` key identifies a file the contents of which will be made 
       # available to the running instance via the OpenStack metadata server.  This 
       # can be used to provide information to a boot-time provisioning tool such
       # as cloud-init.
-      userdata: userdata/master
+      userdata: userdata/common
+
+    # Our master node.
+    master:
       # This instance will be a member of both the default and web
       # security groups.
       security groups:

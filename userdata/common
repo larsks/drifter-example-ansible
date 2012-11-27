@@ -1,0 +1,7 @@
+#cloud-config
+apt_upgrade: true
+packages:
+- puppet
+- git-core
+- ruby-json
+

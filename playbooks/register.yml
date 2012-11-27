@@ -1,0 +1,13 @@
+# This registers the backends with the master.
+- hosts: node*
+  user: ubuntu
+  sudo: true
+  gather_facts: false
+  tasks:
+  # A file that displays information about the backend.
+  - action: template src=files/whoami.html dest=/var/www/whoami.html mode=0644
+  # Create the registration script.
+  - action: template src=files/register-backend.sh dest=/usr/local/sbin/register-backend mode=0755
+  # Register the backend.
+  - action: command /usr/local/sbin/register-backend
+

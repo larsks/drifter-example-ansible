@@ -1,76 +1,9 @@
-# This play simply gathers facts from all the hosts so that we
-# can use them later on in templates and so forth.
-- hosts: all
-  user: ubuntu
-  sudo: true
+# This is the Ansible playbook that provisions the instances created by
+# Drifter.  For more information Ansible playbooks, see the Ansible 
+# project documentation at http://ansible.cc/docs/.
 
-# Install common packages on all systems in 
-# the cluster.
-- hosts: all
-  user: ubuntu
-  sudo: true
-  gather_facts: false
-  tasks:
-  - action: apt pkg=$item
-    with_items:
-    - puppet
-    - git-core
-    - ruby-json
-    - apache2
-
-# Set up the frontend server.
-- hosts: master
-  user: ubuntu
-  sudo: true
-  gather_facts: false
-  tasks:
-  - action: apt pkg=$item
-    with_items:
-    - python-sqlalchemy
-    - python-bottle
-    - python-yaml
-    - libapache2-mod-wsgi
-    - sqlite3
-  - action: file state=absent path=/etc/apache2/sites-enabled/000-default
-    notify:
-    - restart apache
-  - action: file state=link src=/etc/apache2/mods-available/$item path=/etc/apache2/mods-enabled/$item
-    with_items:
-    - rewrite.load
-    - wsgi.conf
-    - wsgi.load
-    - proxy.conf
-    - proxy.load
-    - proxy_http.load
-    notify:
-    - restart apache
-  - action: copy src=files/frontend dest=/etc/apache2/sites-enabled/frontend
-    notify:
-    - restart apache
-  - action: git repo=git://github.com/larsks/dynproxy dest=/var/lib/dynproxy
-    notify:
-    - restart apache
-  - action: copy src=files/dynproxy.yml dest=/etc/dynproxy.yml
-    notify:
-    - restart apache
-  - action: copy src=files/dynproxy-rwm dest=/usr/local/sbin/dynproxy-rwm mode=0755
-    notify:
-    - restart apache
-  - action: command rm -f /var/cache/apache2/dynproxy.db
-  - action: command /usr/bin/sudo -u www-data /usr/bin/python /var/lib/dynproxy/dynproxy/initdb.py
-  - action: copy src=files/noproxies.html dest=/var/www/noproxies.html
-  - action: service name=apache2 state=started
-  handlers:
-  - name: restart apache
-    action: command /usr/sbin/service apache2 restart
-
-# This registers the backends with the master.
-- hosts: node*
-  user: ubuntu
-  sudo: true
-  gather_facts: false
-  tasks:
-  - action: template src=files/whoami.html dest=/var/www/whoami.html mode=0644
-  - action: template src=files/register-backend.sh dest=/usr/local/sbin/register-backend mode=0755
-  - action: command /usr/local/sbin/register-backend
+- include: playbooks/facts.yml
+- include: playbooks/common.yml
+- include: playbooks/frontend.yml
+- include: playbooks/register.yml
 
